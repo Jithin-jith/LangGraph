@@ -5,9 +5,17 @@ langgraph-checkpoint-sqlite
 langsmith
 langchain-community
 langchain-core
+langchain-google-genai
 langchain-openai
 notebook
 tavily-python
 wikipedia
 trustcall
 langgraph-cli[inmem]
+langchain-groq
+fastapi
+uvicorn
+pytest
+python-dotenv
+black 
+isort
