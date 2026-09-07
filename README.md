@@ -65,6 +65,7 @@ python Module_02_Chatbots_and_Tools/03_custom_tools_and_fallbacks.py
 python Module_03_Memory_and_Persistence/01_in_memory_checkpointer.py
 python Module_03_Memory_and_Persistence/02_sqlite_persistence.py
 python Module_03_Memory_and_Persistence/03_time_travel_and_replay.py
+python Module_03_Memory_and_Persistence/04_multi_user_sqlite_chatbot.py
 
 # Module 04: Human-in-the-Loop
 python Module_04_Human_in_the_Loop/01_interrupt_approval.py
