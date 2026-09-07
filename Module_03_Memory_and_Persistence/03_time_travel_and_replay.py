@@ -1,3 +1,8 @@
+"""
+Module 03 - Lesson 03: Time Travel, State Inspection & Editing
+Demonstrates inspecting state history, traversing checkpoints, updating state, and rewinding execution graph flows.
+"""
+
 import os
 import sys
 import warnings

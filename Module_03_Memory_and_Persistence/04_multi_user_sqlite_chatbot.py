@@ -1,15 +1,43 @@
+"""
+Module 03 - Lesson 04: Multi-User SQLite Persistent Chatbot
+Demonstrates a multi-user chatbot application with distinct thread persistence and data isolation in SQLite.
+"""
+
 import os
 import sys
 import warnings
 import sqlite3
-from dotenv import load_dotenv
+import logging
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-# Suppress Google GenAI SDK Automatic Function Calling (AFC) recommendation notice
-warnings.filterwarnings("ignore", message=".*automatic function calling.*")
+# Filter out lower-level SDK warnings written directly to sys.stderr
+class StderrFilter:
+    def __init__(self, original_stderr):
+        self.original_stderr = original_stderr
 
+    def write(self, msg):
+        if "automatic function calling" in msg or "AFC" in msg:
+            return
+        self.original_stderr.write(msg)
+
+    def flush(self):
+        if hasattr(self.original_stderr, "flush"):
+            self.original_stderr.flush()
+
+sys.stderr = StderrFilter(sys.stderr)
+
+os.environ["PYTHONWARNINGS"] = "ignore"
+warnings.simplefilter("ignore")
+warnings.filterwarnings("ignore")
+warnings.showwarning = lambda *args, **kwargs: None
+
+logging.getLogger("google").setLevel(logging.ERROR)
+logging.getLogger("google.genai").setLevel(logging.ERROR)
+logging.getLogger("langchain_google_genai").setLevel(logging.ERROR)
+
+from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 from langgraph.graph import StateGraph, MessagesState, START, END

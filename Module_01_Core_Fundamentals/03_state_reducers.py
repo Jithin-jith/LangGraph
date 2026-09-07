@@ -1,12 +1,44 @@
+"""
+Module 01 - Lesson 03: State Reducers & Accumulation
+Demonstrates using Annotated list state reducers (operator.add) to append values instead of overwriting state.
+"""
+
 import os
+import sys
 import warnings
+import logging
 from typing import TypedDict, Annotated
 from operator import add
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+# Filter out lower-level SDK warnings written directly to sys.stderr
+class StderrFilter:
+    def __init__(self, original_stderr):
+        self.original_stderr = original_stderr
+
+    def write(self, msg):
+        if "automatic function calling" in msg or "AFC" in msg:
+            return
+        self.original_stderr.write(msg)
+
+    def flush(self):
+        if hasattr(self.original_stderr, "flush"):
+            self.original_stderr.flush()
+
+sys.stderr = StderrFilter(sys.stderr)
+
+os.environ["PYTHONWARNINGS"] = "ignore"
+warnings.simplefilter("ignore")
+warnings.filterwarnings("ignore")
+warnings.showwarning = lambda *args, **kwargs: None
+
+logging.getLogger("google").setLevel(logging.ERROR)
+logging.getLogger("google.genai").setLevel(logging.ERROR)
+logging.getLogger("langchain_google_genai").setLevel(logging.ERROR)
+
 from dotenv import load_dotenv
-
-# Suppress Google GenAI SDK Automatic Function Calling (AFC) recommendation notice
-warnings.filterwarnings("ignore", message=".*automatic function calling.*")
-
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import StateGraph, START, END
 

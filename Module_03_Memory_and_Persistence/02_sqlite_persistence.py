@@ -1,15 +1,43 @@
+"""
+Module 03 - Lesson 02: Persistent SQLite Checkpointer
+Demonstrates disk-backed state persistence using SqliteSaver for long-term memory across process restarts.
+"""
+
 import os
 import sys
 import warnings
 import sqlite3
-from dotenv import load_dotenv
+import logging
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-# Suppress Google GenAI SDK Automatic Function Calling (AFC) recommendation notice
-warnings.filterwarnings("ignore", message=".*automatic function calling.*")
+# Filter out lower-level SDK warnings written directly to sys.stderr
+class StderrFilter:
+    def __init__(self, original_stderr):
+        self.original_stderr = original_stderr
 
+    def write(self, msg):
+        if "automatic function calling" in msg or "AFC" in msg:
+            return
+        self.original_stderr.write(msg)
+
+    def flush(self):
+        if hasattr(self.original_stderr, "flush"):
+            self.original_stderr.flush()
+
+sys.stderr = StderrFilter(sys.stderr)
+
+os.environ["PYTHONWARNINGS"] = "ignore"
+warnings.simplefilter("ignore")
+warnings.filterwarnings("ignore")
+warnings.showwarning = lambda *args, **kwargs: None
+
+logging.getLogger("google").setLevel(logging.ERROR)
+logging.getLogger("google.genai").setLevel(logging.ERROR)
+logging.getLogger("langchain_google_genai").setLevel(logging.ERROR)
+
+from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 from langgraph.graph import StateGraph, MessagesState, START, END
@@ -69,9 +97,11 @@ if __name__ == "__main__":
         # 🧪 EXPERIMENT: After running the script once, comment out this Turn 1
         # block and re-run the script. Turn 2 below will STILL remember Titan!
         # --------------------------------------------------------------------
-        print("\nSending Message 1...")
+        print("\n--- Sending Message 1 ---")
+        msg_1 = "Remember my secret project code name is Project Titan."
+        print(f"User: {msg_1}")
         r1 = app.invoke(
-            {"messages": [HumanMessage(content="Remember my secret project code name is Project Titan.")]},
+            {"messages": [HumanMessage(content=msg_1)]},
             config=config
         )
         print(f"AI Response 1: {r1['messages'][-1].content}\n")
@@ -79,9 +109,11 @@ if __name__ == "__main__":
         # --------------------------------------------------------------------
         # TURN 2: Reads prior conversation history from 'checkpoints.sqlite'
         # --------------------------------------------------------------------
-        print("Sending Message 2...")
+        print("--- Sending Message 2 ---")
+        msg_2 = "What is my secret project code name?"
+        print(f"User: {msg_2}")
         r2 = app.invoke(
-            {"messages": [HumanMessage(content="What is my secret project code name?")]},
+            {"messages": [HumanMessage(content=msg_2)]},
             config=config
         )
         print(f"AI Response 2: {r2['messages'][-1].content}")
